@@ -1,0 +1,149 @@
+{
+  "report_id": "AI-SOC-RPT-202604140347",
+  "generated_at": "2026-04-14 03:47:39 UTC",
+  "frameworks": {
+    "ISO27001": {
+      "A.12.4.1": {
+        "control": "Logging of events",
+        "status": "COMPLIANT",
+        "evidence": "All events logged from SIEM(158184), EDR(289), NDR(37044), Cloud(200000). Total 372973 alerts ingested and correlated."
+      },
+      "A.12.4.2": {
+        "control": "Protection of log information",
+        "status": "COMPLIANT",
+        "evidence": "Log integrity maintained. CloudTrail deletion attempts flagged: StopLogging(2), DeleteTrail(1) \u2014 Defense Evasion detected."
+      },
+      "A.12.6.1": {
+        "control": "Management of technical vulnerabilities",
+        "status": "COMPLIANT",
+        "evidence": "Zero-day vulnerability detection: 9,882 anomalies via Isolation Forest. 5 malware families classified via DBSCAN unsupervised clustering."
+      },
+      "A.16.1.1": {
+        "control": "Responsibilities and procedures",
+        "status": "COMPLIANT",
+        "evidence": "RL-SOAR automated 100.0% of Tier-1 tasks. Policy improvement: 1294%."
+      },
+      "A.16.1.4": {
+        "control": "Assessment of and decision on information security events",
+        "status": "COMPLIANT",
+        "evidence": "GNN entity graph: 303 nodes, 445 edges. 59 lateral movement suspects, 4 APT-pattern nodes identified."
+      },
+      "A.16.1.5": {
+        "control": "Response to information security incidents",
+        "status": "COMPLIANT",
+        "evidence": "MTTD reduced 80.0% (240min \u2192 48min). Critical incidents: 16. Playbooks executed automatically."
+      },
+      "A.16.1.6": {
+        "control": "Learning from information security incidents",
+        "status": "COMPLIANT",
+        "evidence": "Reinforcement Learning agent continuously improves playbook selection based on incident outcomes across 500 training episodes."
+      },
+      "A.12.2.1": {
+        "control": "Controls against malware",
+        "status": "COMPLIANT",
+        "evidence": "Adversarial ML detector: 100.0% accuracy. AI-crafted phishing catch rate: 100.0%. Phishing flags raised: 11,558."
+      }
+    },
+    "SOC2": {
+      "CC6.1": {
+        "control": "Logical and physical access controls",
+        "status": "COMPLIANT",
+        "evidence": "Transformer UEBA flagged 5 insider threats. After-hours access detected on all flagged entities (100% after-hours ratio)."
+      },
+      "CC6.6": {
+        "control": "Logical access security measures",
+        "status": "COMPLIANT",
+        "evidence": "GNN kill-chain correlation identified 4 APT nodes spanning Privilege Escalation (AssumeRole: 79,322 events) and Defense Evasion (StopLogging, DeleteTrail)."
+      },
+      "CC7.1": {
+        "control": "System monitoring",
+        "status": "COMPLIANT",
+        "evidence": "Continuous monitoring across SIEM, EDR, NDR, Cloud. 372,973 alerts processed. MTTD: 48 min."
+      },
+      "CC7.2": {
+        "control": "Monitoring of system components",
+        "status": "COMPLIANT",
+        "evidence": "GNN entity graph monitors 303 entities and 445 relationships in real-time."
+      },
+      "CC7.3": {
+        "control": "Evaluation of security events",
+        "status": "COMPLIANT",
+        "evidence": "AI triage: 100.0% automated. 16 CRITICAL, 1 HIGH, 33 MEDIUM incidents classified and triaged."
+      },
+      "CC7.4": {
+        "control": "Incident response",
+        "status": "COMPLIANT",
+        "evidence": "SOAR playbooks: ISOLATE+ESCALATE, CONTAIN+INVESTIGATE, MONITOR+ENRICH, BLOCK IP+ALERT, LOG+CLOSE. RL-optimised selection per incident state."
+      },
+      "CC9.2": {
+        "control": "Risk mitigation",
+        "status": "COMPLIANT",
+        "evidence": "Zero-day detection: 9,882 threats. 89 novel behaviors quarantined for sandbox analysis."
+      }
+    },
+    "NIST_CSF": {
+      "ID.AM": {
+        "control": "Asset Management",
+        "status": "IMPLEMENTED",
+        "evidence": "Entity graph catalogues 303 assets across SIEM, EDR, NDR, Cloud data sources."
+      },
+      "ID.RA": {
+        "control": "Risk Assessment",
+        "status": "IMPLEMENTED",
+        "evidence": "Behavioral anomaly score computed for all 37,044 NDR records. Isolation Forest anomaly rate: 26.7%."
+      },
+      "PR.AC": {
+        "control": "Identity Management & Access Control",
+        "status": "IMPLEMENTED",
+        "evidence": "UEBA insider threat detection: 5 entities flagged via Transformer self-attention (threshold: 4.0)."
+      },
+      "PR.IP": {
+        "control": "Information Protection Processes",
+        "status": "IMPLEMENTED",
+        "evidence": "Adversarial ML: 6,500 phishing simulations. Detector F1: 1.0000."
+      },
+      "DE.AE": {
+        "control": "Anomalies & Events",
+        "status": "IMPLEMENTED",
+        "evidence": "MITRE ATT&CK mapped: 8 tactics across kill-chain. GNN multi-stage APT paths detected: 4."
+      },
+      "DE.CM": {
+        "control": "Continuous Monitoring",
+        "status": "IMPLEMENTED",
+        "evidence": "All 4 sources monitored: SIEM(158,184 events), EDR(289), NDR(37,044), Cloud(200,000). Real-time correlation active."
+      },
+      "RS.RP": {
+        "control": "Response Planning",
+        "status": "IMPLEMENTED",
+        "evidence": "RL-SOAR: 500 training episodes, 1294% policy improvement. 5 playbooks optimised."
+      },
+      "RS.CO": {
+        "control": "Communications",
+        "status": "IMPLEMENTED",
+        "evidence": "LLM Analyst Copilot: 7 query types supported. Natural language investigation interface operational."
+      },
+      "RC.RP": {
+        "control": "Recovery Planning",
+        "status": "IMPLEMENTED",
+        "evidence": "MTTD 80.0% reduction. Mean time to respond: 48 minutes."
+      }
+    }
+  },
+  "kpis": {
+    "mttd_reduction_pct": 80.0,
+    "auto_triage_pct": 100.0,
+    "zero_day_count": 9882,
+    "malware_families": 5,
+    "insider_threats": 5,
+    "phishing_flags": 11558,
+    "apt_nodes": 4,
+    "critical_incidents": 16,
+    "total_alerts": 372973
+  },
+  "incidents": {
+    "CRITICAL": 16,
+    "HIGH": 1,
+    "MEDIUM": 33,
+    "LOW": 0
+  }
+}

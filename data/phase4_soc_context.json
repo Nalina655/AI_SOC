@@ -1,0 +1,230 @@
+{
+  "soc_status": {
+    "total_alerts_ingested": 372973,
+    "unique_incidents": 50,
+    "critical_incidents": 16,
+    "high_incidents": 1,
+    "mttd_reduction_pct": 80.0,
+    "auto_triage_pct": 100.0,
+    "data_sources_active": [
+      "SIEM",
+      "EDR",
+      "NDR",
+      "CLOUD"
+    ]
+  },
+  "gnn_lateral_movement": {
+    "graph_nodes": 303,
+    "graph_edges": 445,
+    "lateral_suspects": 59,
+    "apt_nodes": 4,
+    "top_suspects": [
+      {
+        "entity": "LAPTOP-1MKMTVPM",
+        "lateral_mv_score": 2019.6,
+        "max_severity": 3.0,
+        "in_degree": 34,
+        "data_source": "SIEM"
+      },
+      {
+        "entity": "ListBuckets",
+        "lateral_mv_score": 92.5,
+        "max_severity": 1.0,
+        "in_degree": 141,
+        "data_source": "CLOUD"
+      },
+      {
+        "entity": "AssumeRole",
+        "lateral_mv_score": 29.6,
+        "max_severity": 2.0,
+        "in_degree": 4,
+        "data_source": "CLOUD"
+      },
+      {
+        "entity": "dsp-ms.dsp.lab",
+        "lateral_mv_score": 26.9,
+        "max_severity": 3.0,
+        "in_degree": 1,
+        "data_source": "EDR"
+      },
+      {
+        "entity": "GetRestApis",
+        "lateral_mv_score": 12.8,
+        "max_severity": 1.0,
+        "in_degree": 16,
+        "data_source": "CLOUD"
+      }
+    ]
+  },
+  "ueba_insider_threats": {
+    "entities_analysed": 10,
+    "threats_flagged": 5,
+    "attention_threshold": 4.0,
+    "flagged_entities": [
+      {
+        "entity": "EC2AMAZ-N0JSFD5",
+        "insider_score": 5.3628,
+        "max_attn_anomaly": 0.0416,
+        "sev_spike": 1.619,
+        "after_hours_ratio": 1.0
+      },
+      {
+        "entity": "win-dc-807.attackrange.local",
+        "insider_score": 5.3006,
+        "max_attn_anomaly": 0.0218,
+        "sev_spike": 1.6176,
+        "after_hours_ratio": 1.0
+      },
+      {
+        "entity": "EC2AMAZ-H0SHIJ3",
+        "insider_score": 5.1196,
+        "max_attn_anomaly": 0.0399,
+        "sev_spike": 1.5,
+        "after_hours_ratio": 1.0
+      },
+      {
+        "entity": "win-dc-807",
+        "insider_score": 4.7345,
+        "max_attn_anomaly": 0.0129,
+        "sev_spike": 1.3478,
+        "after_hours_ratio": 1.0
+      },
+      {
+        "entity": "LAPTOP-1MKMTVPM",
+        "insider_score": 4.084,
+        "max_attn_anomaly": 0.0113,
+        "sev_spike": 1.91,
+        "after_hours_ratio": 0.115
+      }
+    ]
+  },
+  "rl_soar_playbooks": {
+    "policy_improvement_pct": 1294.1,
+    "auto_triage_pct": 100.0,
+    "critical_actions": [
+      {
+        "entity": "LAPTOP-1MKMTVPM",
+        "severity": 3,
+        "apt_flag": 1,
+        "source": "SIEM",
+        "optimal_playbook": "ISOLATE + ESCALATE",
+        "q_value": 20.62
+      },
+      {
+        "entity": "AssumeRole",
+        "severity": 2,
+        "apt_flag": 1,
+        "source": "CLOUD",
+        "optimal_playbook": "BLOCK IP + ALERT",
+        "q_value": 11.8
+      },
+      {
+        "entity": "dsp-ms.dsp.lab",
+        "severity": 3,
+        "apt_flag": 1,
+        "source": "EDR",
+        "optimal_playbook": "ISOLATE + ESCALATE",
+        "q_value": 20.62
+      },
+      {
+        "entity": "ConsoleLogin",
+        "severity": 2,
+        "apt_flag": 0,
+        "source": "CLOUD",
+        "optimal_playbook": "BLOCK IP + ALERT",
+        "q_value": 6.8
+      }
+    ]
+  },
+  "zero_day_threats": {
+    "total_anomalies": 9882,
+    "anomaly_rate_pct": 26.7,
+    "malware_families_found": 5,
+    "novel_singleton_threats": 89,
+    "top_zero_day_samples": [
+      {
+        "label": "unknown",
+        "protocol_type": "tcp",
+        "service": "telnet",
+        "flag": "SF",
+        "anomaly_score": -0.1111,
+        "phishing_score": 1.0,
+        "zero_day_threat_score": 1.0
+      },
+      {
+        "label": "unknown",
+        "protocol_type": "tcp",
+        "service": "telnet",
+        "flag": "SF",
+        "anomaly_score": -0.0969,
+        "phishing_score": 1.0,
+        "zero_day_threat_score": 1.0
+      },
+      {
+        "label": "unknown",
+        "protocol_type": "tcp",
+        "service": "telnet",
+        "flag": "SF",
+        "anomaly_score": -0.1952,
+        "phishing_score": 1.0,
+        "zero_day_threat_score": 1.0
+      },
+      {
+        "label": "unknown",
+        "protocol_type": "tcp",
+        "service": "telnet",
+        "flag": "SF",
+        "anomaly_score": -0.0929,
+        "phishing_score": 0.99,
+        "zero_day_threat_score": 0.997
+      },
+      {
+        "label": "unknown",
+        "protocol_type": "tcp",
+        "service": "telnet",
+        "flag": "SF",
+        "anomaly_score": -0.1147,
+        "phishing_score": 0.98,
+        "zero_day_threat_score": 0.994
+      }
+    ]
+  },
+  "adversarial_ml": {
+    "adversarial_examples_gen": 6500,
+    "detector_accuracy_pct": 100.0,
+    "ai_crafted_catch_rate_pct": 100.0,
+    "phishing_flags_raised": 11558
+  },
+  "active_malware_families": [
+    {
+      "cluster_id": 0,
+      "family_name": "Family-A: High-frequency SYN flood",
+      "sample_count": 21687,
+      "is_noise": false
+    },
+    {
+      "cluster_id": 1,
+      "family_name": "Family-B: Low-slow exfiltration",
+      "sample_count": 641,
+      "is_noise": false
+    },
+    {
+      "cluster_id": 2,
+      "family_name": "Family-C: Port scan / Probe",
+      "sample_count": 46,
+      "is_noise": false
+    },
+    {
+      "cluster_id": 4,
+      "family_name": "Family-E: Encrypted C2 beacon",
+      "sample_count": 45,
+      "is_noise": false
+    },
+    {
+      "cluster_id": 3,
+      "family_name": "Family-D: Credential brute-force",
+      "sample_count": 36,
+      "is_noise": false
+    }
+  ]
+}

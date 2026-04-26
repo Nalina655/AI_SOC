@@ -1,0 +1,23 @@
+{
+  "unsupervised_clustering": {
+    "algorithm": "DBSCAN + Isolation Forest",
+    "total_records": 37044,
+    "malware_families_found": 5,
+    "zero_day_anomalies": 9882,
+    "anomaly_rate_pct": 26.7,
+    "novel_singleton_threats": 89,
+    "pca_variance_explained": 70.1
+  },
+  "adversarial_ml": {
+    "algorithm": "FGSM + Random Forest detector",
+    "adversarial_examples_gen": 6500,
+    "detector_accuracy_pct": 100.0,
+    "detector_f1_weighted": 1.0,
+    "ai_crafted_catch_rate_pct": 100.0,
+    "phishing_flags_raised": 11558
+  },
+  "zero_day_detection": {
+    "zero_day_flags_total": 9882,
+    "objective_met": true
+  }
+}

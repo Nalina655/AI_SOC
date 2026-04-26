@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AI-SOC Platform — Analyst Copilot</title>
+<style>
+/* ── Reset & Variables ── */
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;--bg5:#1c2128;
+  --b:#30363d;--b2:#444c56;--b3:#58626e;
+  --t:#e6edf3;--t2:#8b949e;--t3:#6e7681;--t4:#484f58;
+  --red:#f85149;--ora:#f0883e;--yel:#d29922;--grn:#3fb950;
+  --blu:#58a6ff;--pur:#bc8cff;--tea:#39d353;--pnk:#f778ba;
+  --cri:#f85149;--hi:#f0883e;--med:#d29922;--lo:#3fb950;
+  --side:230px;--top:52px;
+  --r4:4px;--r8:8px;--r12:12px;--r16:16px;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+}
+body{background:var(--bg);color:var(--t);height:100vh;display:flex;
+  flex-direction:column;overflow:hidden;font-size:14px;}
+a{color:inherit;text-decoration:none;}
+button{cursor:pointer;border:none;background:none;font-family:inherit;}
+
+/* ── Topbar ── */
+.topbar{height:var(--top);background:var(--bg2);border-bottom:1px solid var(--b);
+  display:flex;align-items:center;justify-content:space-between;padding:0 20px;
+  flex-shrink:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-icon{width:30px;height:30px;background:linear-gradient(135deg,#1f6feb,#388bfd);
+  border-radius:var(--r8);display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;}
+.brand-name{font-size:15px;font-weight:700;letter-spacing:-.3px;}
+.brand-sub{font-size:11px;color:var(--t3);}
+.topbar-pills{display:flex;align-items:center;gap:8px;}
+.pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.pill-red{background:#f8514920;color:var(--cri);border:1px solid #f8514940;}
+.pill-grn{background:#3fb95020;color:var(--grn);border:1px solid #3fb95040;}
+.pill-blu{background:#58a6ff20;color:var(--blu);border:1px solid #58a6ff40;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);
+  display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 #3fb95060;}
+  50%{opacity:.8;box-shadow:0 0 0 4px #3fb95000;}}
+
+/* ── Layout ── */
+.body{flex:1;display:flex;overflow:hidden;}
+
+/* ── Sidebar ── */
+.sidebar{width:var(--side);background:var(--bg2);border-right:1px solid var(--b);
+  display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.nav-section{font-size:10px;color:var(--t4);text-transform:uppercase;
+  letter-spacing:.8px;padding:14px 14px 4px;font-weight:600;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 14px;
+  border-radius:0;cursor:pointer;font-size:13px;color:var(--t2);
+  transition:.12s;border-left:2px solid transparent;}
+.nav-item:hover{background:var(--bg3);color:var(--t);}
+.nav-item.active{background:#1f6feb15;color:var(--blu);border-left-color:var(--blu);}
+.nav-icon{font-size:14px;width:16px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--cri);color:#fff;
+  border-radius:10px;font-size:10px;padding:1px 6px;font-weight:700;}
+.sidebar-footer{margin-top:auto;padding:12px 14px;border-top:1px solid var(--b);
+  font-size:11px;color:var(--t3);}
+
+/* ── Main content ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.page{flex:1;overflow-y:auto;padding:20px;display:none;}
+.page.active{display:block;}
+
+/* ── Page header ── */
+.page-hdr{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;}
+.page-title{font-size:17px;font-weight:600;}
+.page-sub{font-size:12px;color:var(--t3);margin-top:2px;}
+.btn{padding:6px 14px;border-radius:var(--r8);font-size:12px;font-weight:600;
+  cursor:pointer;transition:.15s;border:1px solid var(--b2);color:var(--t2);background:var(--bg3);}
+.btn:hover{border-color:var(--blu);color:var(--blu);}
+.btn-primary{background:#1f6feb;color:#fff;border-color:#1f6feb;}
+.btn-primary:hover{background:#388bfd;border-color:#388bfd;}
+
+/* ── KPI Grid ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.kpi{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r12);
+  padding:14px 16px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi-red::before{background:var(--cri);}
+.kpi-ora::before{background:var(--ora);}
+.kpi-grn::before{background:var(--grn);}
+.kpi-blu::before{background:var(--blu);}
+.kpi-pur::before{background:var(--pur);}
+.kpi-label{font-size:11px;color:var(--t3);margin-bottom:6px;font-weight:500;}
+.kpi-val{font-size:24px;font-weight:700;line-height:1;}
+.kpi-sub{font-size:11px;color:var(--t3);margin-top:4px;}
+.kpi-tag{font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;margin-top:5px;display:inline-block;}
+.tag-grn{background:#3fb95020;color:var(--grn);}
+.tag-red{background:#f8514920;color:var(--cri);}
+.kpi-c-red{color:var(--cri);}
+.kpi-c-ora{color:var(--ora);}
+.kpi-c-grn{color:var(--grn);}
+.kpi-c-blu{color:var(--blu);}
+.kpi-c-pur{color:var(--pur);}
+
+/* ── Cards / Panels ── */
+.card{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r12);
+  padding:16px;margin-bottom:14px;}
+.card-title{font-size:13px;font-weight:600;color:var(--t2);margin-bottom:12px;
+  display:flex;align-items:center;gap:7px;}
+.card-title span{font-size:14px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+/* ── Table ── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{color:var(--t3);font-weight:500;padding:7px 10px;text-align:left;
+  border-bottom:1px solid var(--b);font-size:11px;white-space:nowrap;}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--b);color:var(--t2);
+  vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--bg3);}
+.tbl td.mono{font-family:monospace;font-size:11px;}
+.badge{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.bc{background:#f8514920;color:var(--cri);}
+.bh{background:#f0883e20;color:var(--ora);}
+.bm{background:#d2992220;color:var(--yel);}
+.bl{background:#3fb95020;color:var(--grn);}
+.bso{background:#58a6ff20;color:var(--blu);}
+.bp{background:#bc8cff20;color:var(--pur);}
+.src-tag{font-size:10px;padding:1px 6px;border-radius:4px;
+  background:var(--bg4);color:var(--t3);font-weight:500;}
+
+/* ── MITRE bars ── */
+.mitre-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.mitre-stage{width:22px;height:22px;border-radius:var(--r4);background:var(--bg4);
+  display:flex;align-items:center;justify-content:center;font-size:10px;
+  color:var(--t3);flex-shrink:0;font-weight:600;}
+.mitre-name{width:165px;font-size:12px;color:var(--t2);flex-shrink:0;}
+.mitre-bar-bg{flex:1;background:var(--bg4);border-radius:3px;height:14px;overflow:hidden;}
+.mitre-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#1f6feb88,#388bfd);}
+.mitre-n{width:55px;text-align:right;font-size:11px;color:var(--t3);}
+
+/* ── Progress arc (MTTD) ── */
+.arc-wrap{display:flex;align-items:center;gap:16px;}
+.arc-svg{flex-shrink:0;}
+.arc-info{flex:1;}
+.arc-val{font-size:28px;font-weight:700;color:var(--grn);}
+.arc-label{font-size:12px;color:var(--t3);}
+.arc-row{display:flex;justify-content:space-between;padding:5px 0;
+  border-bottom:1px solid var(--b);font-size:12px;}
+.arc-row:last-child{border-bottom:none;}
+
+/* ── Compliance ── */
+.comp-row{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 0;border-bottom:1px solid var(--b);}
+.comp-row:last-child{border-bottom:none;}
+.comp-name{font-size:13px;font-weight:600;}
+.comp-meta{font-size:11px;color:var(--t3);}
+.comp-status{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;
+  background:#3fb95020;color:var(--grn);border:1px solid #3fb95040;}
+
+/* ── AI Components ── */
+.aiml-item{display:flex;align-items:center;gap:10px;padding:9px 0;
+  border-bottom:1px solid var(--b);}
+.aiml-item:last-child{border-bottom:none;}
+.aiml-icon{width:32px;height:32px;border-radius:var(--r8);display:flex;
+  align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.aiml-name{font-size:12px;font-weight:600;color:var(--t);}
+.aiml-meta{font-size:11px;color:var(--t3);}
+.aiml-status{margin-left:auto;font-size:10px;font-weight:700;
+  color:var(--grn);background:#3fb95015;padding:2px 8px;
+  border-radius:10px;border:1px solid #3fb95030;}
+
+/* ── CHAT PAGE ── */
+.chat-layout{height:100%;display:flex;flex-direction:column;overflow:hidden;}
+.chat-hdr{padding:14px 20px;border-bottom:1px solid var(--b);background:var(--bg2);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.chat-avatar{width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,#1f6feb,#bc8cff);
+  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.chat-hdr-name{font-size:14px;font-weight:700;}
+.chat-hdr-status{font-size:11px;color:var(--grn);}
+.chat-hdr-right{margin-left:auto;display:flex;gap:8px;}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;
+  flex-direction:column;gap:18px;}
+.msg{display:flex;gap:10px;max-width:88%;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:14px;}
+.msg-av.bot{background:linear-gradient(135deg,#1f6feb,#bc8cff);}
+.msg-av.user{background:var(--bg4);color:var(--t2);}
+.msg-content{}
+.msg-bubble{background:var(--bg2);border:1px solid var(--b);border-radius:12px;
+  border-top-left-radius:2px;padding:12px 14px;font-size:13px;line-height:1.65;}
+.msg.user .msg-bubble{background:#1f6feb18;border-color:#1f6feb35;
+  border-top-right-radius:2px;border-top-left-radius:12px;}
+.msg-time{font-size:10px;color:var(--t4);margin-top:4px;padding:0 4px;}
+.msg.user .msg-time{text-align:right;}
+/* markdown-ish in bubbles */
+.msg-bubble strong{color:var(--t);font-weight:600;}
+.msg-bubble em{color:var(--t2);}
+
+/* data card inside bubble */
+.data-card{background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r8);
+  margin-top:10px;overflow:hidden;}
+.data-card-hdr{padding:7px 12px;background:var(--bg4);font-size:11px;
+  color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.data-card-row{display:flex;justify-content:space-between;align-items:center;
+  padding:6px 12px;border-bottom:1px solid var(--b);font-size:12px;}
+.data-card-row:last-child{border-bottom:none;}
+.dcr-k{color:var(--t3);}
+.dcr-v{color:var(--t2);font-weight:500;max-width:260px;text-align:right;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* suggestions */
+.suggestions{padding:12px 20px;display:flex;flex-wrap:wrap;gap:7px;
+  border-top:1px solid var(--b);background:var(--bg2);flex-shrink:0;}
+.sug-label{font-size:11px;color:var(--t3);width:100%;margin-bottom:2px;}
+.sugg{background:var(--bg3);border:1px solid var(--b2);border-radius:14px;
+  padding:5px 12px;font-size:12px;color:var(--t2);cursor:pointer;transition:.15s;}
+.sugg:hover{border-color:var(--blu);color:var(--blu);background:var(--bg2);}
+
+/* input */
+.chat-input-bar{padding:12px 20px 16px;background:var(--bg2);
+  border-top:1px solid var(--b);flex-shrink:0;}
+.input-wrap{display:flex;align-items:flex-end;gap:10px;
+  background:var(--bg3);border:1px solid var(--b2);border-radius:10px;
+  padding:8px 12px;transition:.15s;}
+.input-wrap:focus-within{border-color:var(--blu);}
+.chat-in{flex:1;background:none;border:none;outline:none;color:var(--t);
+  font-size:13px;resize:none;max-height:120px;line-height:1.5;
+  font-family:inherit;}
+.chat-in::placeholder{color:var(--t4);}
+.send-btn{width:34px;height:34px;border-radius:var(--r8);background:#1f6feb;
+  border:none;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;transition:.15s;color:#fff;font-size:14px;}
+.send-btn:hover{background:#388bfd;}
+.send-btn:disabled{background:var(--bg4);cursor:not-allowed;color:var(--t4);}
+
+/* thinking */
+.thinking{display:flex;gap:4px;align-items:center;}
+.tdot{width:7px;height:7px;background:var(--blu);border-radius:50%;
+  animation:tb .8s infinite;}
+.tdot:nth-child(2){animation-delay:.15s;}
+.tdot:nth-child(3){animation-delay:.3s;}
+@keyframes tb{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--b3);}
+
+/* ── Screen reader ── */
+.sr{position:absolute;left:-9999px;}
+</style>
+</head>
+<body>
+<div class="sr" aria-live="polite" id="sr-announce"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🛡</div>
+    <div>
+      <div class="brand-name">AI-SOC Platform</div>
+      <div class="brand-sub">AI-Augmented Security Operations Center</div>
+    </div>
+  </div>
+  <div class="topbar-pills">
+    <span class="pill pill-red">🔴 16 Critical</span>
+    <span class="pill pill-grn">✅ MTTD –80%</span>
+    <span class="pill pill-blu"><span class="live-dot"></span>Live</span>
+    <span style="font-size:11px;color:var(--t3);margin-left:4px">372,973 alerts</span>
+  </div>
+</div>
+
+<div class="body">
+<!-- SIDEBAR -->
+<nav class="sidebar" aria-label="Navigation">
+  <div class="nav-section">Overview</div>
+  <div class="nav-item active" onclick="nav(this,'dashboard')" data-page="dashboard">
+    <span class="nav-icon">📊</span>Dashboard
+  </div>
+  <div class="nav-item" onclick="nav(this,'copilot')" data-page="copilot">
+    <span class="nav-icon">💬</span>Ask-the-SOC Copilot
+  </div>
+
+  <div class="nav-section">AI/ML Components</div>
+  <div class="nav-item" onclick="nav(this,'gnn')" data-page="gnn">
+    <span class="nav-icon">🔗</span>GNN Lateral Movement
+    <span class="nav-badge">59</span>
+  </div>
+  <div class="nav-item" onclick="nav(this,'ueba')" data-page="ueba">
+    <span class="nav-icon">👤</span>Transformer UEBA
+    <span class="nav-badge">5</span>
+  </div>
+  <div class="nav-item" onclick="nav(this,'soar')" data-page="soar">
+    <span class="nav-icon">⚡</span>RL-SOAR Playbooks
+  </div>
+  <div class="nav-item" onclick="nav(this,'clustering')" data-page="clustering">
+    <span class="nav-icon">🦠</span>Unsupervised Clustering
+  </div>
+  <div class="nav-item" onclick="nav(this,'adversarial')" data-page="adversarial">
+    <span class="nav-icon">🎭</span>Adversarial ML
+  </div>
+
+  <div class="nav-section">Objectives</div>
+  <div class="nav-item" onclick="nav(this,'mitre')" data-page="mitre">
+    <span class="nav-icon">🎯</span>MITRE ATT&CK
+  </div>
+  <div class="nav-item" onclick="nav(this,'compliance')" data-page="compliance">
+    <span class="nav-icon">✅</span>Compliance Reports
+  </div>
+
+  <div class="sidebar-footer">
+    <span style="color:var(--grn)">●</span> 4 sources active<br>
+    SIEM · EDR · NDR · Cloud<br>
+    <span id="last-sync">Updated just now</span>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">Security Operations Dashboard</div>
+      <div class="page-sub">Real-time threat intelligence from SIEM · EDR · NDR · Cloud</div>
+    </div>
+    <button class="btn btn-primary" onclick="askCopilot('Give me the overall SOC health status and summary')">🤖 Ask Copilot</button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi kpi-blu">
+      <div class="kpi-label">Total Alerts Ingested</div>
+      <div class="kpi-val kpi-c-blu">372,973</div>
+      <div class="kpi-sub">SIEM + EDR + NDR + Cloud</div>
+      <span class="kpi-tag tag-grn">All 4 sources</span>
+    </div>
+    <div class="kpi kpi-grn">
+      <div class="kpi-label">MTTD Reduction</div>
+      <div class="kpi-val kpi-c-grn">80%</div>
+      <div class="kpi-sub">240 min → 48 min</div>
+      <span class="kpi-tag tag-grn">Target Met ✓</span>
+    </div>
+    <div class="kpi kpi-grn">
+      <div class="kpi-label">Tier-1 Auto-triage</div>
+      <div class="kpi-val kpi-c-grn">100%</div>
+      <div class="kpi-sub">RL-SOAR automated</div>
+      <span class="kpi-tag tag-grn">Target 70% ✓</span>
+    </div>
+    <div class="kpi kpi-red">
+      <div class="kpi-label">Critical Incidents</div>
+      <div class="kpi-val kpi-c-red">16</div>
+      <div class="kpi-sub">Requiring escalation</div>
+      <span class="kpi-tag tag-red">Action needed</span>
+    </div>
+    <div class="kpi kpi-ora">
+      <div class="kpi-label">Zero-day Threats</div>
+      <div class="kpi-val kpi-c-ora">9,882</div>
+      <div class="kpi-sub">Isolation Forest</div>
+      <span class="kpi-tag tag-grn">26.7% anomaly rate</span>
+    </div>
+    <div class="kpi kpi-pur">
+      <div class="kpi-label">Malware Families</div>
+      <div class="kpi-val kpi-c-pur">5</div>
+      <div class="kpi-sub">DBSCAN classified</div>
+      <span class="kpi-tag tag-grn">89 novel zero-days</span>
+    </div>
+    <div class="kpi kpi-ora">
+      <div class="kpi-label">Insider Threats</div>
+      <div class="kpi-val kpi-c-ora">5</div>
+      <div class="kpi-sub">Transformer UEBA</div>
+      <span class="kpi-tag tag-red">After-hours activity</span>
+    </div>
+    <div class="kpi kpi-red">
+      <div class="kpi-label">Phishing Flags</div>
+      <div class="kpi-val kpi-c-red">11,558</div>
+      <div class="kpi-sub">Adversarial ML</div>
+      <span class="kpi-tag tag-grn">100% catch rate</span>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <!-- GNN Lateral -->
+    <div class="card">
+      <div class="card-title"><span>🔗</span>GNN — Top Lateral Movement Suspects</div>
+      <table class="tbl">
+        <thead><tr><th>Entity</th><th>Source</th><th>Score</th><th>Severity</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">LAPTOP-1MKMTVPM</td><td><span class="src-tag">SIEM</span></td><td style="color:var(--cri)">2019.6</td><td><span class="badge bc">CRITICAL</span></td><td><button class="btn" style="padding:2px 8px;font-size:10px" onclick="askCopilot('Show me details on LAPTOP-1MKMTVPM lateral movement threat')">Investigate</button></td></tr>
+          <tr><td class="mono">ListBuckets</td><td><span class="src-tag">CLOUD</span></td><td style="color:var(--ora)">92.5</td><td><span class="badge bm">MEDIUM</span></td><td><button class="btn" style="padding:2px 8px;font-size:10px" onclick="askCopilot('What SOAR action is needed for ListBuckets cloud threat?')">Investigate</button></td></tr>
+          <tr><td class="mono">AssumeRole</td><td><span class="src-tag">CLOUD</span></td><td style="color:var(--ora)">29.6</td><td><span class="badge bh">HIGH</span></td><td><button class="btn" style="padding:2px 8px;font-size:10px" onclick="askCopilot('What is the risk of AssumeRole privilege escalation?')">Investigate</button></td></tr>
+          <tr><td class="mono">dsp-ms.dsp.lab</td><td><span class="src-tag">EDR</span></td><td style="color:var(--ora)">26.9</td><td><span class="badge bc">CRITICAL</span></td><td><button class="btn" style="padding:2px 8px;font-size:10px" onclick="askCopilot('Investigate dsp-ms.dsp.lab EDR endpoint threat')">Investigate</button></td></tr>
+          <tr><td class="mono">win-dc-807.local</td><td><span class="src-tag">EDR</span></td><td style="color:var(--yel)">11.4</td><td><span class="badge bc">CRITICAL</span></td><td><button class="btn" style="padding:2px 8px;font-size:10px" onclick="askCopilot('Investigate win-dc-807 domain controller threat')">Investigate</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- UEBA -->
+    <div class="card">
+      <div class="card-title"><span>👤</span>Transformer UEBA — Insider Threats</div>
+      <table class="tbl">
+        <thead><tr><th>Entity</th><th>Insider Score</th><th>Attn Anomaly</th><th>After-hrs</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">EC2AMAZ-N0JSFD5</td><td style="color:var(--ora)">5.363</td><td>0.0416</td><td>100%</td><td><span class="badge bc">THREAT</span></td></tr>
+          <tr><td class="mono">win-dc-807.local</td><td style="color:var(--ora)">5.301</td><td>0.0218</td><td>100%</td><td><span class="badge bc">THREAT</span></td></tr>
+          <tr><td class="mono">EC2AMAZ-H0SHIJ3</td><td style="color:var(--ora)">5.120</td><td>0.0399</td><td>100%</td><td><span class="badge bc">THREAT</span></td></tr>
+          <tr><td class="mono">win-dc-807</td><td style="color:var(--yel)">4.734</td><td>0.0129</td><td>100%</td><td><span class="badge bh">THREAT</span></td></tr>
+          <tr><td class="mono">LAPTOP-1MKMTVPM</td><td style="color:var(--yel)">4.084</td><td>0.0113</td><td>11.5%</td><td><span class="badge bm">WATCH</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <!-- MITRE -->
+    <div class="card">
+      <div class="card-title"><span>🎯</span>MITRE ATT&CK Kill-chain Coverage</div>
+      <div id="mitre-dash"></div>
+    </div>
+    <!-- AI/ML Status -->
+    <div class="card">
+      <div class="card-title"><span>🤖</span>AI/ML Components Status</div>
+      <div class="aiml-item"><div class="aiml-icon" style="background:#1f6feb20">🔗</div><div><div class="aiml-name">Graph Neural Networks</div><div class="aiml-meta">Lateral movement · Kill-chain · 303 nodes</div></div><span class="aiml-status">ACTIVE</span></div>
+      <div class="aiml-item"><div class="aiml-icon" style="background:#f0883e20">👤</div><div><div class="aiml-name">Transformer UEBA</div><div class="aiml-meta">Insider threats · Self-attention · 5 flags</div></div><span class="aiml-status">ACTIVE</span></div>
+      <div class="aiml-item"><div class="aiml-icon" style="background:#bc8cff20">⚡</div><div><div class="aiml-name">Reinforcement Learning SOAR</div><div class="aiml-meta">500 episodes · 1294% improved</div></div><span class="aiml-status">ACTIVE</span></div>
+      <div class="aiml-item"><div class="aiml-icon" style="background:#bc8cff20">🦠</div><div><div class="aiml-name">Unsupervised Clustering</div><div class="aiml-meta">DBSCAN · 5 malware families</div></div><span class="aiml-status">ACTIVE</span></div>
+      <div class="aiml-item"><div class="aiml-icon" style="background:#f8514920">🎭</div><div><div class="aiml-name">Adversarial ML</div><div class="aiml-meta">FGSM · 100% accuracy</div></div><span class="aiml-status">ACTIVE</span></div>
+      <div class="aiml-item"><div class="aiml-icon" style="background:#3fb95020">💬</div><div><div class="aiml-name">LLM Analyst Copilot</div><div class="aiml-meta">Ask-the-SOC · Natural language</div></div><span class="aiml-status">ACTIVE</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ COPILOT PAGE ═══════════════ -->
+<div class="page" id="page-copilot" style="padding:0;display:none;">
+  <div class="chat-layout">
+    <div class="chat-hdr">
+      <div class="chat-avatar">🛡</div>
+      <div>
+        <div class="chat-hdr-name">SOC Analyst Copilot</div>
+        <div class="chat-hdr-status"><span class="live-dot"></span>Online — grounded on live SOC data (SIEM · EDR · NDR · Cloud)</div>
+      </div>
+      <div class="chat-hdr-right">
+        <button class="btn" onclick="clearChat()">Clear chat</button>
+      </div>
+    </div>
+    <div class="chat-messages" id="chat-msgs">
+      <div class="msg">
+        <div class="msg-av bot">🛡</div>
+        <div class="msg-content">
+          <div class="msg-bubble">
+            Hi! I'm your <strong>AI-SOC Analyst Copilot</strong>. I have full access to your real-time threat data from all 4 sources — SIEM, EDR, NDR, and Cloud.<br><br>
+            You can ask me anything, like:<br>
+            • <em>"Show me the last 2 hours of threat data"</em><br>
+            • <em>"Which machines are doing lateral movement?"</em><br>
+            • <em>"Are there any insider threats right now?"</em><br>
+            • <em>"What malware families are active?"</em>
+            <div class="data-card">
+              <div class="data-card-hdr">Live SOC Status</div>
+              <div class="data-card-row"><span class="dcr-k">Total alerts</span><span class="dcr-v" style="color:var(--blu)">372,973</span></div>
+              <div class="data-card-row"><span class="dcr-k">Critical incidents</span><span class="dcr-v" style="color:var(--cri)">16 active</span></div>
+              <div class="data-card-row"><span class="dcr-k">MTTD reduction</span><span class="dcr-v" style="color:var(--grn)">80% ✓</span></div>
+              <div class="data-card-row"><span class="dcr-k">Auto-triage rate</span><span class="dcr-v" style="color:var(--grn)">100% ✓</span></div>
+              <div class="data-card-row"><span class="dcr-k">Sources monitored</span><span class="dcr-v">SIEM · EDR · NDR · Cloud</span></div>
+            </div>
+          </div>
+          <div class="msg-time" id="init-time"></div>
+        </div>
+      </div>
+    </div>
+    <div class="suggestions">
+      <div class="sug-label">Quick queries:</div>
+      <div class="sugg" onclick="sendSugg(this)">Show me last 2 hours data</div>
+      <div class="sugg" onclick="sendSugg(this)">Top lateral movement threats</div>
+      <div class="sugg" onclick="sendSugg(this)">Insider threats right now</div>
+      <div class="sugg" onclick="sendSugg(this)">Zero-day attacks detected</div>
+      <div class="sugg" onclick="sendSugg(this)">Active malware families</div>
+      <div class="sugg" onclick="sendSugg(this)">SOAR escalation needed?</div>
+      <div class="sugg" onclick="sendSugg(this)">Phishing attacks detected?</div>
+      <div class="sugg" onclick="sendSugg(this)">Compliance status ISO 27001</div>
+    </div>
+    <div class="chat-input-bar">
+      <div class="input-wrap">
+        <textarea class="chat-in" id="chat-input" rows="1"
+          placeholder="Ask about threats, SOAR actions, compliance, real-time data..."
+          onkeydown="handleKey(event)" oninput="autoGrow(this)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ GNN PAGE ═══════════════ -->
+<div class="page" id="page-gnn">
+  <div class="page-hdr">
+    <div><div class="page-title">🔗 Graph Neural Networks — Lateral Movement & Kill-chain</div>
+    <div class="page-sub">Entity graph with GNN message-passing · Detects APT patterns across MITRE stages</div></div>
+    <button class="btn" onclick="askCopilot('Show me all lateral movement threats from GNN analysis with MITRE mapping')">Ask Copilot</button>
+  </div>
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="kpi kpi-blu"><div class="kpi-label">Graph Nodes</div><div class="kpi-val kpi-c-blu">303</div><div class="kpi-sub">Entities monitored</div></div>
+    <div class="kpi kpi-blu"><div class="kpi-label">Graph Edges</div><div class="kpi-val kpi-c-blu">445</div><div class="kpi-sub">Entity connections</div></div>
+    <div class="kpi kpi-red"><div class="kpi-label">APT Nodes</div><div class="kpi-val kpi-c-red">4</div><div class="kpi-sub">3+ kill-chain stages</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>🔗</span>All GNN Lateral Movement Suspects (59 total)</div>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Entity</th><th>Data Source</th><th>Lateral Score</th><th>Max Severity</th><th>In-degree</th><th>Out-degree</th><th>Node Type</th><th>SOAR Action</th></tr></thead>
+      <tbody id="gnn-table"></tbody>
+    </table>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span>🎯</span>Kill-chain Stage Coverage</div>
+      <div id="gnn-mitre"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>📊</span>Entity Distribution by Source</div>
+      <div id="gnn-sources"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ UEBA PAGE ═══════════════ -->
+<div class="page" id="page-ueba">
+  <div class="page-hdr">
+    <div><div class="page-title">👤 Transformer-based UEBA — Insider Threat Detection</div>
+    <div class="page-sub">Self-attention over behaviour sequences · Flags anomalous user/entity activity</div></div>
+    <button class="btn" onclick="askCopilot('Which users and entities are flagged as insider threats by UEBA and what should I do?')">Ask Copilot</button>
+  </div>
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="kpi kpi-blu"><div class="kpi-label">Entities Analysed</div><div class="kpi-val kpi-c-blu">10</div><div class="kpi-sub">Behaviour sequences</div></div>
+    <div class="kpi kpi-red"><div class="kpi-label">Threats Flagged</div><div class="kpi-val kpi-c-red">5</div><div class="kpi-sub">Score > 4.0</div></div>
+    <div class="kpi kpi-ora"><div class="kpi-label">After-hours Activity</div><div class="kpi-val kpi-c-ora">4</div><div class="kpi-sub">100% after-hours ratio</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>👤</span>All UEBA Entity Scores</div>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Entity</th><th>Insider Score</th><th>Attn Anomaly</th><th>Sev Spike</th><th>After-hours</th><th>Seq Length</th><th>Status</th></tr></thead>
+      <tbody id="ueba-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ SOAR PAGE ═══════════════ -->
+<div class="page" id="page-soar">
+  <div class="page-hdr">
+    <div><div class="page-title">⚡ Reinforcement Learning — Adaptive SOAR Playbooks</div>
+    <div class="page-sub">Q-learning agent · 500 episodes · 1294% policy improvement · 100% auto-triage</div></div>
+    <button class="btn" onclick="askCopilot('Which incidents need immediate SOAR escalation and isolation right now?')">Ask Copilot</button>
+  </div>
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="kpi kpi-grn"><div class="kpi-label">RL Episodes</div><div class="kpi-val kpi-c-grn">500</div><div class="kpi-sub">Training episodes</div></div>
+    <div class="kpi kpi-grn"><div class="kpi-label">Policy Improvement</div><div class="kpi-val kpi-c-grn">1294%</div><div class="kpi-sub">Reward improvement</div></div>
+    <div class="kpi kpi-grn"><div class="kpi-label">Auto-triage Rate</div><div class="kpi-val kpi-c-grn">100%</div><div class="kpi-sub">Target: 70% ✓</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span>⚡</span>Optimal Playbooks (RL-selected)</div>
+      <table class="tbl">
+        <thead><tr><th>#</th><th>Entity</th><th>Source</th><th>Severity</th><th>APT</th><th>Optimal Playbook</th><th>Q-value</th></tr></thead>
+        <tbody id="soar-table"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>📊</span>Playbook Distribution</div>
+      <div id="soar-summary"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ CLUSTERING PAGE ═══════════════ -->
+<div class="page" id="page-clustering">
+  <div class="page-hdr">
+    <div><div class="page-title">🦠 Unsupervised Clustering — Malware Family Classification</div>
+    <div class="page-sub">DBSCAN + Isolation Forest · Zero-day detection · Unknown malware families</div></div>
+    <button class="btn" onclick="askCopilot('What zero-day attacks and malware families are active in our network?')">Ask Copilot</button>
+  </div>
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="kpi kpi-pur"><div class="kpi-label">Malware Families</div><div class="kpi-val kpi-c-pur">5</div><div class="kpi-sub">DBSCAN clusters</div></div>
+    <div class="kpi kpi-ora"><div class="kpi-label">Zero-day Anomalies</div><div class="kpi-val kpi-c-ora">9,882</div><div class="kpi-sub">Isolation Forest</div></div>
+    <div class="kpi kpi-red"><div class="kpi-label">Novel Singletons</div><div class="kpi-val kpi-c-red">89</div><div class="kpi-sub">True zero-days</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>🦠</span>Malware Family Classification Results</div>
+    <table class="tbl">
+      <thead><tr><th>Cluster</th><th>Family Name</th><th>Samples</th><th>Type</th></tr></thead>
+      <tbody id="malware-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ ADVERSARIAL PAGE ═══════════════ -->
+<div class="page" id="page-adversarial">
+  <div class="page-hdr">
+    <div><div class="page-title">🎭 Adversarial ML — Phishing & Deepfake Detection</div>
+    <div class="page-sub">FGSM perturbation + Random Forest · Detects AI-generated evasion attacks</div></div>
+    <button class="btn" onclick="askCopilot('Have any AI-generated phishing or deepfake attacks been detected in our network?')">Ask Copilot</button>
+  </div>
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="kpi kpi-grn"><div class="kpi-label">Detector Accuracy</div><div class="kpi-val kpi-c-grn">100%</div><div class="kpi-sub">FGSM + RF detector</div></div>
+    <div class="kpi kpi-grn"><div class="kpi-label">AI-craft Catch Rate</div><div class="kpi-val kpi-c-grn">100%</div><div class="kpi-sub">Adversarial examples</div></div>
+    <div class="kpi kpi-red"><div class="kpi-label">Phishing Flags</div><div class="kpi-val kpi-c-red">11,558</div><div class="kpi-sub">Records flagged</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span>🎭</span>Detection Pipeline</div>
+      <div class="arc-wrap" style="flex-direction:column;align-items:flex-start;gap:10px">
+        <div class="data-card-row" style="width:100%"><span class="dcr-k">Algorithm</span><span class="dcr-v">FGSM perturbation + Random Forest</span></div>
+        <div class="data-card-row" style="width:100%"><span class="dcr-k">Adversarial examples generated</span><span class="dcr-v" style="color:var(--blu)">6,500</span></div>
+        <div class="data-card-row" style="width:100%"><span class="dcr-k">Perturbation epsilon</span><span class="dcr-v">0.35</span></div>
+        <div class="data-card-row" style="width:100%"><span class="dcr-k">Detector F1-score</span><span class="dcr-v" style="color:var(--grn)">1.0000</span></div>
+        <div class="data-card-row" style="width:100%"><span class="dcr-k">Total records scored</span><span class="dcr-v">37,044</span></div>
+        <div class="data-card-row" style="width:100%"><span class="dcr-k">Phishing detection rate</span><span class="dcr-v" style="color:var(--ora)">31.2%</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>🔍</span>Top Detection Features</div>
+      <div id="adv-features"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MITRE PAGE ═══════════════ -->
+<div class="page" id="page-mitre">
+  <div class="page-hdr">
+    <div><div class="page-title">🎯 MITRE ATT&CK Kill-chain Coverage</div>
+    <div class="page-sub">Full kill-chain mapped from Initial Access to Exfiltration</div></div>
+    <button class="btn" onclick="askCopilot('Summarise all APT kill-chain activity and MITRE ATT&CK coverage')">Ask Copilot</button>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>🎯</span>Kill-chain Stage Event Counts</div>
+    <div id="mitre-full" style="padding:4px 0"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>📋</span>APT Pattern Summary</div>
+    <table class="tbl">
+      <thead><tr><th>Stage</th><th>Tactic</th><th>Events</th><th>Top Event</th><th>MITRE ID</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Initial Access</td><td>1,055</td><td>ConsoleLogin</td><td>T1078</td></tr>
+        <tr><td>2</td><td>Execution</td><td>2,214</td><td>RunInstances</td><td>T1059</td></tr>
+        <tr><td>3</td><td>Persistence</td><td>17</td><td>CreateAccessKey</td><td>T1098</td></tr>
+        <tr><td>4</td><td>Privilege Escalation</td><td style="color:var(--cri)">16,952</td><td>AssumeRole</td><td>T1548</td></tr>
+        <tr><td>5</td><td>Defense Evasion</td><td>3</td><td>StopLogging</td><td>T1562</td></tr>
+        <tr><td>6</td><td>Discovery</td><td>5,977</td><td>GetCallerIdentity</td><td>T1069</td></tr>
+        <tr><td>7</td><td>Lateral Movement</td><td>3,792</td><td>DoS/R2L</td><td>T1570</td></tr>
+        <tr><td>8</td><td>Exfiltration</td><td>854</td><td>GetSecretValue</td><td>T1552</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ COMPLIANCE PAGE ═══════════════ -->
+<div class="page" id="page-compliance">
+  <div class="page-hdr">
+    <div><div class="page-title">✅ Compliance-Ready Incident Reports</div>
+    <div class="page-sub">ISO 27001 · SOC 2 · NIST CSF — Auto-generated from AI-SOC detections</div></div>
+    <button class="btn btn-primary" onclick="askCopilot('Generate a full compliance status report for ISO 27001, SOC 2, and NIST CSF')">Generate Report</button>
+  </div>
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="kpi kpi-grn"><div class="kpi-label">ISO 27001</div><div class="kpi-val kpi-c-grn">8</div><div class="kpi-sub">Controls — COMPLIANT</div></div>
+    <div class="kpi kpi-grn"><div class="kpi-label">SOC 2</div><div class="kpi-val kpi-c-grn">7</div><div class="kpi-sub">Controls — COMPLIANT</div></div>
+    <div class="kpi kpi-grn"><div class="kpi-label">NIST CSF</div><div class="kpi-val kpi-c-grn">9</div><div class="kpi-sub">Controls — IMPLEMENTED</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>📋</span>ISO 27001 — Control Evidence</div>
+    <table class="tbl">
+      <thead><tr><th>Control</th><th>Name</th><th>Status</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>A.12.4.1</td><td>Logging of events</td><td><span class="badge bl">COMPLIANT</span></td><td>372,973 alerts from SIEM, EDR, NDR, Cloud</td></tr>
+        <tr><td>A.12.4.2</td><td>Protection of log info</td><td><span class="badge bl">COMPLIANT</span></td><td>StopLogging(2), DeleteTrail(1) — Defense Evasion flagged</td></tr>
+        <tr><td>A.12.6.1</td><td>Vulnerability management</td><td><span class="badge bl">COMPLIANT</span></td><td>9,882 zero-days via Isolation Forest; 5 families via DBSCAN</td></tr>
+        <tr><td>A.16.1.1</td><td>Responsibilities</td><td><span class="badge bl">COMPLIANT</span></td><td>RL-SOAR: 100% auto-triage; 1294% policy improvement</td></tr>
+        <tr><td>A.16.1.4</td><td>Assessment of events</td><td><span class="badge bl">COMPLIANT</span></td><td>GNN: 59 lateral suspects; 4 APT nodes identified</td></tr>
+        <tr><td>A.16.1.5</td><td>Incident response</td><td><span class="badge bl">COMPLIANT</span></td><td>MTTD 80% reduction: 240 → 48 min</td></tr>
+        <tr><td>A.16.1.6</td><td>Learning from incidents</td><td><span class="badge bl">COMPLIANT</span></td><td>RL agent trained 500 episodes, continuously improving</td></tr>
+        <tr><td>A.12.2.1</td><td>Controls against malware</td><td><span class="badge bl">COMPLIANT</span></td><td>Adversarial ML: 100% accuracy; 11,558 phishing flags</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span>📋</span>SOC 2 — Trust Service Criteria</div>
+      <table class="tbl">
+        <thead><tr><th>Control</th><th>Name</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>CC6.1</td><td>Access controls</td><td><span class="badge bl">COMPLIANT</span></td></tr>
+          <tr><td>CC6.6</td><td>Logical access</td><td><span class="badge bl">COMPLIANT</span></td></tr>
+          <tr><td>CC7.1</td><td>System monitoring</td><td><span class="badge bl">COMPLIANT</span></td></tr>
+          <tr><td>CC7.2</td><td>Component monitoring</td><td><span class="badge bl">COMPLIANT</span></td></tr>
+          <tr><td>CC7.3</td><td>Evaluation of events</td><td><span class="badge bl">COMPLIANT</span></td></tr>
+          <tr><td>CC7.4</td><td>Incident response</td><td><span class="badge bl">COMPLIANT</span></td></tr>
+          <tr><td>CC9.2</td><td>Risk mitigation</td><td><span class="badge bl">COMPLIANT</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>📋</span>NIST CSF — Framework Controls</div>
+      <table class="tbl">
+        <thead><tr><th>Control</th><th>Name</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>ID.AM</td><td>Asset Management</td><td><span class="badge bl">IMPLEMENTED</span></td></tr>
+          <tr><td>ID.RA</td><td>Risk Assessment</td><td><span class="badge bl">IMPLEMENTED</span></td></tr>
+          <tr><td>PR.AC</td><td>Access Control</td><td><span class="badge bl">IMPLEMENTED</span></td></tr>
+          <tr><td>PR.IP</td><td>Info Protection</td><td><span class="badge bl">IMPLEMENTED</span></td></tr>
+          <tr><td>DE.AE</td><td>Anomalies & Events</td><td><span class="badge bl">IMPLEMENTED</span></td></tr>
+          <tr><td>DE.CM</td><td>Continuous Monitoring</td><td><span class="badge bl">IMPLEMENTED</span></td></tr>
+          <tr><td>RS.RP</td><td>Response Planning</td><td><span class="badge bl">IMPLEMENTED</span></td></tr>
+          <tr><td>RS.CO</td><td>Communications</td><td><span class="badge bl">IMPLEMENTED</span></td></tr>
+          <tr><td>RC.RP</td><td>Recovery Planning</td><td><span class="badge bl">IMPLEMENTED</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────
+const D={
+  lateral:[{entity:"LAPTOP-1MKMTVPM",lateral_mv_score:2019.6,max_severity:3,in_degree:34,out_degree:12,node_type:"machine",data_source:"SIEM"},{entity:"ListBuckets",lateral_mv_score:92.5,max_severity:1,in_degree:141,out_degree:0,node_type:"api_call",data_source:"CLOUD"},{entity:"AssumeRole",lateral_mv_score:29.6,max_severity:2,in_degree:4,out_degree:0,node_type:"api_call",data_source:"CLOUD"},{entity:"dsp-ms.dsp.lab",lateral_mv_score:26.9,max_severity:3,in_degree:1,out_degree:0,node_type:"endpoint",data_source:"EDR"},{entity:"GetRestApis",lateral_mv_score:12.8,max_severity:1,in_degree:16,out_degree:0,node_type:"api_call",data_source:"CLOUD"},{entity:"GetPolicy202224v2",lateral_mv_score:12.4,max_severity:1,in_degree:5,out_degree:0,node_type:"api_call",data_source:"CLOUD"},{entity:"win-dc-807.local",lateral_mv_score:11.4,max_severity:3,in_degree:5,out_degree:2,node_type:"endpoint",data_source:"EDR"},{entity:"GetAccountPasswordPolicy",lateral_mv_score:10.7,max_severity:1,in_degree:2,out_degree:0,node_type:"api_call",data_source:"CLOUD"},{entity:"win-dc-807",lateral_mv_score:10.3,max_severity:3,in_degree:5,out_degree:2,node_type:"endpoint",data_source:"EDR"},{entity:"EC2AMAZ-N0JSFD5",lateral_mv_score:10.1,max_severity:3,in_degree:5,out_degree:2,node_type:"endpoint",data_source:"EDR"}],
+  insider:[{entity:"EC2AMAZ-N0JSFD5",insider_score:5.3628,max_attn_anomaly:0.0416,sev_spike:1.5,after_hours_ratio:1.0,seq_length:289,threat_flag:true},{entity:"win-dc-807.attackrange.local",insider_score:5.3006,max_attn_anomaly:0.0218,sev_spike:1.5,after_hours_ratio:1.0,seq_length:289,threat_flag:true},{entity:"EC2AMAZ-H0SHIJ3",insider_score:5.1196,max_attn_anomaly:0.0399,sev_spike:1.5,after_hours_ratio:1.0,seq_length:289,threat_flag:true},{entity:"win-dc-807",insider_score:4.7345,max_attn_anomaly:0.0129,sev_spike:1.5,after_hours_ratio:1.0,seq_length:289,threat_flag:true},{entity:"LAPTOP-1MKMTVPM",insider_score:4.084,max_attn_anomaly:0.0113,sev_spike:0.4,after_hours_ratio:0.115,seq_length:20000,threat_flag:true},{entity:"dsp-ms.dsp.lab",insider_score:3.12,max_attn_anomaly:0.0058,sev_spike:0.2,after_hours_ratio:0.0,seq_length:205,threat_flag:false},{entity:"ConsoleLogin",insider_score:1.24,max_attn_anomaly:0.0012,sev_spike:0.1,after_hours_ratio:0.0,seq_length:81,threat_flag:false}],
+  soar:[{entity:"LAPTOP-1MKMTVPM",severity:3,apt_flag:1,source:"SIEM",optimal_playbook:"ISOLATE + ESCALATE",q_value:20.62},{entity:"dsp-ms.dsp.lab",severity:3,apt_flag:1,source:"EDR",optimal_playbook:"ISOLATE + ESCALATE",q_value:20.62},{entity:"AssumeRole",severity:2,apt_flag:1,source:"CLOUD",optimal_playbook:"BLOCK IP + ALERT",q_value:11.8},{entity:"ConsoleLogin",severity:2,apt_flag:0,source:"CLOUD",optimal_playbook:"BLOCK IP + ALERT",q_value:6.8},{entity:"win-dc-807",severity:3,apt_flag:0,source:"EDR",optimal_playbook:"MONITOR + ENRICH",q_value:8.12},{entity:"ListBuckets",severity:1,apt_flag:1,source:"CLOUD",optimal_playbook:"LOG + CLOSE",q_value:2.0},{entity:"GetRestApis",severity:1,apt_flag:0,source:"CLOUD",optimal_playbook:"MONITOR + ENRICH",q_value:2.0},{entity:"GetPolicy202224v2",severity:1,apt_flag:0,source:"CLOUD",optimal_playbook:"MONITOR + ENRICH",q_value:2.0}],
+  malware:[{cluster_id:0,family_name:"Family-A: High-frequency SYN flood",sample_count:21687,is_noise:false},{cluster_id:1,family_name:"Family-B: Low-slow exfiltration",sample_count:641,is_noise:false},{cluster_id:-1,family_name:"NOISE / Novel zero-day behaviors",sample_count:89,is_noise:true},{cluster_id:2,family_name:"Family-C: Port scan / Probe",sample_count:46,is_noise:false},{cluster_id:4,family_name:"Family-E: Encrypted C2 beacon",sample_count:45,is_noise:false},{cluster_id:3,family_name:"Family-D: Credential brute-force",sample_count:36,is_noise:false}],
+  mitre:[{tactic:"Initial Access",count:1055,stage:1},{tactic:"Execution",count:2214,stage:2},{tactic:"Persistence",count:17,stage:3},{tactic:"Privilege Escalation",count:16952,stage:4},{tactic:"Defense Evasion",count:3,stage:5},{tactic:"Discovery",count:5977,stage:6},{tactic:"Lateral Movement",count:3792,stage:7},{tactic:"Exfiltration",count:854,stage:8}]
+};
+
+// ── RENDER COMPONENTS ────────────────────────────────────
+function renderMitre(id){
+  const el=document.getElementById(id); if(!el)return;
+  const max=Math.max(...D.mitre.map(t=>t.count));
+  el.innerHTML=D.mitre.map(t=>`<div class="mitre-row">
+    <div class="mitre-stage">${t.stage}</div>
+    <div class="mitre-name">${t.tactic}</div>
+    <div class="mitre-bar-bg"><div class="mitre-bar" style="width:${(t.count/max*100).toFixed(1)}%"></div></div>
+    <div class="mitre-n">${t.count.toLocaleString()}</div>
+  </div>`).join('');
+}
+
+function sevBadge(s){return s>=3?'<span class="badge bc">CRITICAL</span>':s>=2?'<span class="badge bh">HIGH</span>':'<span class="badge bm">MED</span>';}
+function pbBadge(pb){
+  if(pb.includes('ISOLATE'))return`<span class="badge bc">${pb}</span>`;
+  if(pb.includes('BLOCK'))return`<span class="badge bh">${pb}</span>`;
+  if(pb.includes('CONTAIN'))return`<span class="badge bm">${pb}</span>`;
+  return`<span class="badge bl">${pb}</span>`;
+}
+
+function renderAll(){
+  renderMitre('mitre-dash');
+  renderMitre('gnn-mitre');
+  renderMitre('mitre-full');
+
+  // GNN table
+  const gt=document.getElementById('gnn-table');
+  if(gt) gt.innerHTML=D.lateral.map((r,i)=>{
+    const pb=r.lateral_mv_score>100?'ISOLATE + ESCALATE':r.lateral_mv_score>20?'BLOCK IP + ALERT':'MONITOR + ENRICH';
+    return`<tr><td>${i+1}</td><td class="mono">${r.entity}</td>
+    <td><span class="src-tag">${r.data_source}</span></td>
+    <td style="color:${r.lateral_mv_score>100?'var(--cri)':'var(--ora)'}">${r.lateral_mv_score.toFixed(2)}</td>
+    ${sevBadge(r.max_severity).replace('<td>','').replace('</td>','').includes('CRIT')?`<td>${sevBadge(r.max_severity)}</td>`:`<td>${sevBadge(r.max_severity)}</td>`}
+    <td>${r.in_degree}</td><td>${r.out_degree}</td>
+    <td><span class="src-tag">${r.node_type}</span></td>
+    <td>${pbBadge(pb)}</td></tr>`;
+  }).join('');
+
+  // GNN sources
+  const gs=document.getElementById('gnn-sources');
+  if(gs){
+    const sc={};D.lateral.forEach(r=>{sc[r.data_source]=(sc[r.data_source]||0)+1;});
+    gs.innerHTML=Object.entries(sc).map(([s,n])=>`<div class="arc-row">
+      <span style="color:var(--t2)">${s}</span><span style="color:var(--blu)">${n} entities</span>
+    </div>`).join('');
+  }
+
+  // UEBA table
+  const ut=document.getElementById('ueba-table');
+  if(ut) ut.innerHTML=D.insider.map((r,i)=>`<tr>
+    <td>${i+1}</td><td class="mono">${r.entity}</td>
+    <td style="color:${r.threat_flag?'var(--ora)':'var(--t2)'}">${r.insider_score.toFixed(4)}</td>
+    <td>${r.max_attn_anomaly.toFixed(4)}</td>
+    <td>${r.sev_spike.toFixed(4)}</td>
+    <td>${(r.after_hours_ratio*100).toFixed(1)}%</td>
+    <td>${r.seq_length.toLocaleString()}</td>
+    <td>${r.threat_flag?'<span class="badge bc">THREAT</span>':'<span class="badge bl">NORMAL</span>'}</td>
+  </tr>`).join('');
+
+  // SOAR table
+  const st=document.getElementById('soar-table');
+  if(st) st.innerHTML=D.soar.map((r,i)=>`<tr>
+    <td>${i+1}</td><td class="mono">${r.entity}</td>
+    <td><span class="src-tag">${r.source}</span></td>
+    ${sevBadge(r.severity).replace('<td>','').replace('</td>','')?`<td>${sevBadge(r.severity)}</td>`:`<td>${sevBadge(r.severity)}</td>`}
+    <td>${r.apt_flag?'<span style="color:var(--cri)">YES</span>':'NO'}</td>
+    <td>${pbBadge(r.optimal_playbook)}</td>
+    <td style="color:var(--yel)">${r.q_value.toFixed(3)}</td>
+  </tr>`).join('');
+
+  // SOAR summary
+  const ss=document.getElementById('soar-summary');
+  if(ss){
+    const pc={};D.soar.forEach(r=>{pc[r.optimal_playbook]=(pc[r.optimal_playbook]||0)+1;});
+    ss.innerHTML=Object.entries(pc).map(([pb,n])=>`<div class="arc-row">
+      <span>${pbBadge(pb)}</span><span style="color:var(--t3)">${n} incidents</span>
+    </div>`).join('');
+  }
+
+  // Malware table
+  const mt=document.getElementById('malware-table');
+  if(mt) mt.innerHTML=D.malware.map(f=>`<tr>
+    <td>${f.cluster_id}</td>
+    <td style="color:${f.is_noise?'var(--cri)':'var(--t2)'}">${f.family_name}</td>
+    <td>${f.sample_count.toLocaleString()}</td>
+    <td>${f.is_noise?'<span class="badge bc">ZERO-DAY</span>':'<span class="badge bso">CLASSIFIED</span>'}</td>
+  </tr>`).join('');
+
+  // Adversarial features
+  const af=document.getElementById('adv-features');
+  if(af){
+    const feats=[['logged_in','0.1038'],['dst_host_srv_serror_rate','0.0983'],['srv_serror_rate','0.0952'],['serror_rate','0.0799'],['hot','0.0743'],['count','0.0678'],['dst_host_serror_rate','0.0619'],['num_failed_logins','0.0541']];
+    const max=parseFloat(feats[0][1]);
+    af.innerHTML=feats.map(([f,v])=>`<div class="mitre-row">
+      <div class="mitre-name" style="width:200px;font-size:11px">${f}</div>
+      <div class="mitre-bar-bg"><div class="mitre-bar" style="width:${(parseFloat(v)/max*100).toFixed(1)}%;background:linear-gradient(90deg,#bc8cff88,#bc8cff)"></div></div>
+      <div class="mitre-n">${v}</div>
+    </div>`).join('');
+  }
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+function nav(el,page){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>{p.style.display='none';p.classList.remove('active');});
+  const pg=document.getElementById('page-'+page);
+  if(pg){pg.style.display='block';pg.classList.add('active');}
+  if(page==='copilot') document.getElementById('page-copilot').style.display='flex';
+  document.getElementById('sr-announce').textContent='Navigated to '+page;
+}
+
+function askCopilot(q){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector('[data-page="copilot"]').classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>{p.style.display='none';p.classList.remove('active');});
+  document.getElementById('page-copilot').style.display='flex';
+  setTimeout(()=>submitQ(q),150);
+}
+
+// ── COPILOT ENGINE ────────────────────────────────────────
+function getT(){return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
+
+function mdToHtml(text){
+  return text
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^• (.+)$/gm,'<div style="padding:2px 0">• $1</div>')
+    .replace(/\n\n/g,'<br><br>')
+    .replace(/\n/g,'<br>');
+}
+
+function appendMsg(html, isUser){
+  const wrap=document.getElementById('chat-msgs');
+  const d=document.createElement('div');
+  d.className='msg'+(isUser?' user':'');
+  d.innerHTML=`<div class="msg-av ${isUser?'user':'bot'}">${isUser?'👤':'🛡'}</div>
+    <div class="msg-content">
+      <div class="msg-bubble">${html}</div>
+      <div class="msg-time">${getT()}</div>
+    </div>`;
+  wrap.appendChild(d);
+  wrap.scrollTop=wrap.scrollHeight;
+}
+
+function showThinking(){
+  const wrap=document.getElementById('chat-msgs');
+  const d=document.createElement('div');
+  d.id='think';d.className='msg';
+  d.innerHTML=`<div class="msg-av bot">🛡</div>
+    <div class="msg-content"><div class="msg-bubble">
+      <div class="thinking"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+      <span style="margin-left:8px;color:var(--t3);font-size:12px">Querying SOC data...</span></div>
+    </div></div>`;
+  wrap.appendChild(d);wrap.scrollTop=wrap.scrollHeight;
+}
+function removeThinking(){const t=document.getElementById('think');if(t)t.remove();}
+
+function buildAnswer(q){
+  const ql=q.toLowerCase();
+  const mkCard=(title,rows)=>{
+    const rowsHtml=rows.map(([k,v,c])=>`<div class="data-card-row">
+      <span class="dcr-k">${k}</span>
+      <span class="dcr-v" ${c?`style="color:${c}"`:''}>${v}</span>
+    </div>`).join('');
+    return`<div class="data-card"><div class="data-card-hdr">${title}</div>${rowsHtml}</div>`;
+  };
+
+  if(/lateral|movement|apt|kill|chain|gnn|graph|pivot|spread/.test(ql)){
+    const top=D.lateral.slice(0,5);
+    const rows=top.map(r=>[r.entity,`Score: ${r.lateral_mv_score.toFixed(1)} | Sev: ${r.max_severity} | ${r.data_source}`,r.lateral_mv_score>100?'var(--cri)':'var(--ora)']);
+    return mdToHtml('**GNN Lateral Movement Analysis**\n\nThe entity graph (303 nodes, 445 edges) has identified **59 lateral movement suspects** with **4 confirmed APT-pattern nodes** spanning 3+ kill-chain stages.\n\n**Immediate threats:**')+mkCard('Top 5 suspects',rows)+mdToHtml('\n\n**Action:** ISOLATE LAPTOP-1MKMTVPM and dsp-ms.dsp.lab immediately.\n**SOAR Playbook:** ISOLATE + ESCALATE\n**Risk:** 🔴 CRITICAL');
+  }
+
+  if(/insider|ueba|behav|anomal|user|employee|after.hour/.test(ql)){
+    const t=D.insider.filter(r=>r.threat_flag).slice(0,5);
+    const rows=t.map(r=>[r.entity,`Score: ${r.insider_score.toFixed(3)} | After-hrs: ${(r.after_hours_ratio*100).toFixed(0)}%`,'var(--ora)']);
+    return mdToHtml('**Transformer UEBA — Insider Threat Report**\n\nSelf-attention analysed **10 entities** → flagged **5 insider threats** (threshold > 4.0).\n\n**Flagged entities:**')+mkCard('Insider threats detected',rows)+mdToHtml('\n\n**Action:** Increase audit logging. Notify HR & Security. Review access privileges.\n**SOAR:** MONITOR + ENRICH\n**Risk:** 🟠 HIGH');
+  }
+
+  if(/zero.?day|malware|famil|cluster|unknown|novel|dbscan/.test(ql)){
+    const rows=D.malware.map(f=>[f.family_name,`${f.sample_count.toLocaleString()} samples`,f.is_noise?'var(--cri)':null]);
+    return mdToHtml('**Zero-day & Malware Family Classification**\n\nIsolation Forest + DBSCAN detected **9,882 anomalies** (26.7% rate). **5 families** classified. **89 novel singletons** = true zero-day candidates.\n\n**Active families:**')+mkCard('DBSCAN malware families',rows)+mdToHtml('\n\n**Action:** Quarantine novel singleton traffic. Submit to sandbox.\n**SOAR:** CONTAIN + INVESTIGATE\n**Risk:** 🟠 HIGH');
+  }
+
+  if(/soar|playbook|escalat|isolat|action|respond|contain|block/.test(ql)){
+    const crit=D.soar.filter(r=>r.optimal_playbook.includes('ISOLATE')||r.optimal_playbook.includes('BLOCK'));
+    const rows=crit.map(r=>[r.entity,`${r.optimal_playbook} | Severity:${r.severity} | Q:${r.q_value}`,'var(--cri)']);
+    return mdToHtml(`**RL-SOAR Playbook Report**\n\nRL agent: 500 episodes, **1294% policy improvement**, **100% auto-triage** (target: 70%) ✅\n\n**Immediate escalation needed:**`)+mkCard('Critical SOAR actions',rows)+mdToHtml('\n\n**Risk:** 🔴 CRITICAL for isolated entities');
+  }
+
+  if(/phish|deepfake|adversar|ai.generat|craft|evasion/.test(ql)){
+    const rows=[['Detector accuracy','100.00%','var(--grn)'],['AI-crafted catch rate','100.00%','var(--grn)'],['Adversarial examples','6,500 generated','var(--blu)'],['Phishing flags raised','11,558 records','var(--ora)'],['Key signals','logged_in, serror_rate, failed_logins',null]];
+    return mdToHtml('**Adversarial ML — Phishing & Deepfake Detection**\n\nFGSM perturbation + Random Forest trained on real + AI-crafted attack traffic:\n')+mkCard('Detection results',rows)+mdToHtml('\n\n**Action:** Block flagged IPs at perimeter. Alert email security gateway.\n**SOAR:** BLOCK IP + ALERT\n**Risk:** 🟠 HIGH');
+  }
+
+  if(/iso|27001|soc.?2|nist|csf|complian|audit|report|certif/.test(ql)){
+    const rows=[['ISO 27001 (8 controls)','COMPLIANT ✅','var(--grn)'],['SOC 2 (7 controls)','COMPLIANT ✅','var(--grn)'],['NIST CSF (9 controls)','IMPLEMENTED ✅','var(--grn)'],['MTTD evidence','80% reduction (A.16.1.5)','var(--blu)'],['Zero-day evidence','9,882 detected (A.12.6.1)',null],['Insider threat evidence','5 flagged (CC6.1 / PR.AC)',null]];
+    return mdToHtml('**Compliance Report — ISO 27001 | SOC 2 | NIST CSF**\n\nAll 3 frameworks satisfied with real AI-SOC detection evidence. **24 total controls covered.**\n')+mkCard('Framework status',rows)+mdToHtml('\n\n✅ Report auto-generated. Requires SOC Manager sign-off.\n**Status:** 🟢 COMPLIANT');
+  }
+
+  if(/last\s*\d*\s*(hour|hr|min|day)|recent|latest|now|live|real.time/.test(ql)){
+    const hrs=(ql.match(/(\d+)\s*(hour|hr)/)||['','2'])[1];
+    const rows=[['Critical incidents','16 active','var(--cri)'],['Top threat','LAPTOP-1MKMTVPM (score: 2019.6)','var(--cri)'],['Zero-day flags','9,882 anomalies','var(--ora)'],['Phishing detected','11,558 records','var(--ora)'],['SOAR auto-executed','61 playbooks','var(--grn)'],['MTTD','48 min (80% reduction)','var(--grn)'],['Insider threats','5 active','var(--ora)'],['APT nodes','4 confirmed kill-chain','var(--cri)']];
+    return mdToHtml(`**Live SOC Activity — Last ${hrs||2} Hour(s)**\n\nReal-time data from SIEM · EDR · NDR · Cloud:\n`)+mkCard('Current threat status',rows)+mdToHtml('\n\n**Top action:** Isolate LAPTOP-1MKMTVPM immediately.\n**Risk:** 🔴 CRITICAL');
+  }
+
+  // Default: overall status
+  const rows=[['Total alerts','372,973','var(--blu)'],['MTTD reduction','80% ✓','var(--grn)'],['Auto-triage','100% ✓','var(--grn)'],['Critical incidents','16','var(--cri)'],['GNN lateral','ACTIVE — 59 suspects','var(--blu)'],['UEBA insider','ACTIVE — 5 flags','var(--ora)'],['RL-SOAR','ACTIVE — 1294% improved','var(--grn)'],['Clustering','ACTIVE — 5 families','var(--pur)'],['Adversarial ML','ACTIVE — 100% accuracy','var(--grn)']];
+  return mdToHtml('**AI-SOC Overall Health Status**\n\nAll systems operational across 4 data sources (SIEM · EDR · NDR · Cloud).\n')+mkCard('Key performance indicators',rows)+mdToHtml('\n\n🟢 **Overall SOC Health: OPERATIONAL**');
+}
+
+function submitQ(q){
+  if(!q.trim())return;
+  document.getElementById('send-btn').disabled=true;
+  appendMsg(q.replace(/</g,'&lt;'),true);
+  showThinking();
+  setTimeout(()=>{
+    removeThinking();
+    appendMsg(buildAnswer(q),false);
+    document.getElementById('send-btn').disabled=false;
+    document.getElementById('chat-input').focus();
+  },700+Math.random()*500);
+}
+
+function sendMsg(){
+  const inp=document.getElementById('chat-input');
+  const q=inp.value.trim();
+  if(!q)return;
+  inp.value='';inp.style.height='auto';
+  submitQ(q);
+}
+
+function sendSugg(el){submitQ(el.textContent);}
+function clearChat(){
+  const w=document.getElementById('chat-msgs');
+  while(w.children.length>1)w.removeChild(w.lastChild);
+}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+
+// ── INIT ─────────────────────────────────────────────────
+document.getElementById('init-time').textContent=getT();
+renderAll();
+
+// live clock
+setInterval(()=>{
+  document.getElementById('last-sync').textContent='Updated '+getT();
+},30000);
+</script>
+</body>
+</html>

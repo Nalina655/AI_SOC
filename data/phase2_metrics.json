@@ -1,0 +1,24 @@
+{
+  "GNN": {
+    "nodes": 303,
+    "edges": 445,
+    "lateral_suspects": 59,
+    "apt_nodes": 4
+  },
+  "UEBA": {
+    "entities": 10,
+    "insider_flags": 5
+  },
+  "RL": {
+    "episodes": 500,
+    "improvement_pct": 1294.1,
+    "auto_triage_pct": 100.0,
+    "target_met": true
+  },
+  "MTTD": {
+    "baseline_min": 240,
+    "ai_soc_min": 48,
+    "reduction_pct": 80.0,
+    "target_met": true
+  }
+}

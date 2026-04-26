@@ -1,0 +1,11 @@
+entity,seq_length,max_attn_anomaly,sev_spike,after_hours_ratio,insider_score,threat_flag
+EC2AMAZ-N0JSFD5,21,0.0416,1.619,1.0,5.3628,True
+win-dc-807.attackrange.local,34,0.0218,1.6176,1.0,5.3006,True
+EC2AMAZ-H0SHIJ3,6,0.0399,1.5,1.0,5.1196,True
+win-dc-807,23,0.0129,1.3478,1.0,4.7345,True
+LAPTOP-1MKMTVPM,20000,0.0113,1.91,0.115,4.084,True
+dsp-ms.dsp.lab,205,0.0073,1.96,0.0,3.9418,False
+arn:aws:iam::811596193553:user,3419,0.0427,0.795,0.39,2.4982,False
+arn:aws:sts::811596193553:assu,160,0.0416,0.4187,0.5062,1.9749,False
+arn:aws:iam::811596193553:root,6184,0.0289,0.85,0.0,1.7866,False
+unknown,237,0.0246,0.0,0.43,0.9337,False
