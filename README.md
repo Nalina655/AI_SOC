@@ -1,12 +1,8 @@
 # 🛡️ AI-Augmented Security Operations Center (AI-SOC)
-### With Autonomous Threat Hunting
-
-> **✅ 100% Compliant with Problem Statement** — All objectives, AI/ML components, and compliance requirements are fully implemented.
-
 ---
 
 ## 📋 Table of Contents
-1. [What This Project Does (Plain English)](#what-this-project-does)
+1. [What This Project Does ](#what-this-project-does)
 2. [Does It Meet the Requirements?](#does-it-meet-the-requirements)
 3. [How It All Works — The Full Flow](#how-it-all-works)
 4. [AI/ML Components Explained](#aiml-components-explained)
@@ -16,7 +12,7 @@
 
 ---
 
-## 🧠 What This Project Does (Plain English)
+## What This Project Does 
 
 Imagine a company's computer network getting **1,000+ security alerts every single day**. Human security analysts (called Tier-1 SOC analysts) get exhausted trying to look at all of them — they miss real threats or respond too slowly. Hackers who are nation-state sponsored (called APT — Advanced Persistent Threat actors) are very smart and use tricks that normal security tools can't detect.
 
@@ -29,10 +25,7 @@ Imagine a company's computer network getting **1,000+ security alerts every sing
 - 📄 **Generates legal compliance reports** for security standards (ISO 27001, SOC 2, NIST CSF)
 
 ---
-
-## ✅ Does It Meet the Requirements?
-
-### Key Objectives — Check ✅
+### Key Objectives — Check 
 
 | Objective from Problem Statement | Status | Evidence |
 |---|---|---|
@@ -71,7 +64,7 @@ Think of this like a **5-phase factory assembly line** for catching hackers:
 
 ---
 
-### 🔵 PHASE 1 — Data Ingestion (The "Vacuum Cleaner")
+### 🔵 PHASE 1 — Data Ingestion 
 
 ```
 [SIEM Logs] ──┐
@@ -89,7 +82,7 @@ Think of this like a **5-phase factory assembly line** for catching hackers:
 
 ---
 
-### 🔵 PHASE 2 — AI/ML Threat Detection (The "Brain" — 3 Models)
+### 🔵 PHASE 2 — AI/ML Threat Detection 
 
 #### 🕸️ Model 1: Graph Neural Network (GNN) — "The Connection Mapper"
 
@@ -148,10 +141,10 @@ Actions available:
 ```
 
 **What it does:**
-- Uses **Reinforcement Learning** (the same type of AI used in chess-playing AlphaGo)
+- Uses **Reinforcement Learning** 
 - Trained over **500 episodes** — tried different responses and learned which ones work best
 - Improved its decision-making by **1,294%** over baseline
-- Now automatically triages **100% of Tier-1 alerts** (target was 70%) ✅
+- Now automatically triages **100% of Tier-1 alerts** 
 
 **In plain English:** Like a very experienced security guard who has seen every type of break-in attempt and knows exactly which protocol to follow without being told.
 
@@ -180,7 +173,7 @@ Unknown threat: [???] ← DBSCAN spots this as a new cluster → ZERO-DAY!
 
 ```
 Hacker creates AI-generated phishing email ──► Looks real to humans
-                                               ──► AI detector catches it! ✅
+                                               ──► AI detector catches it! 
 ```
 
 **What it does:**
@@ -193,7 +186,7 @@ Hacker creates AI-generated phishing email ──► Looks real to humans
 
 ---
 
-### 🔵 PHASE 4 — Analyst Copilot (The "AI Assistant")
+### 🔵 PHASE 4 — Analyst Copilot 
 
 ```
 Analyst types: "Which users are flagged as insider threats?"
@@ -204,7 +197,7 @@ Analyst types: "Which users are flagged as insider threats?"
 ```
 
 **What it does:**
-- Connects to the **Claude Sonnet API** (same AI you're talking to now!)
+- Connects to the **Claude Sonnet API** 
 - Builds a rich context from ALL phases (GNN findings, UEBA flags, RL playbooks, etc.)
 - Analysts can ask natural language questions and get expert-level answers
 - Has a **rule-based fallback** if API key isn't set (so it always works)
@@ -216,9 +209,9 @@ Analyst types: "Which users are flagged as insider threats?"
 ### 🔵 PHASE 5 — Compliance Reports (The "Paperwork Generator")
 
 ```
-All AI Findings ──► Auto-mapped to ──► ISO 27001 (8 controls ✅)
-                                    ──► SOC 2     (7 controls ✅)
-                                    ──► NIST CSF  (9 controls ✅)
+All AI Findings ──► Auto-mapped to ──► ISO 27001 (8 controls )
+                                    ──► SOC 2     (7 controls )
+                                    ──► NIST CSF  (9 controls )
                                     ──► PDF Report ready for auditors
 ```
 
